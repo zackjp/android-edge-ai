@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -17,15 +18,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.zackjp.android.edgeai.R
 import com.zackjp.android.edgeai.ui.theme.AndroidEdgeAITheme
@@ -34,17 +34,38 @@ import com.zackjp.android.edgeai.ui.theme.AndroidEdgeAITheme
 @Composable
 fun DescribeImageScreenRoot(
     modifier: Modifier = Modifier,
+    viewModel: DescribeImageViewModel = viewModel<DescribeImageViewModel>(),
 ) {
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+
+    Box(
+        modifier = modifier,
+    ) {
+        DescribeImageScreen(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            selectedImageUri = uiState.imageUri,
+            onImageUriSelected = viewModel::onImageUriSelected,
+        )
+    }
+}
+
+@Composable
+private fun DescribeImageScreen(
+    modifier: Modifier = Modifier,
+    selectedImageUri: Uri?,
+    onImageUriSelected: (imageUri: Uri?) -> Unit
+) {
+
     val selectImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) { imageUri ->
-        selectedImageUri = imageUri
+        onImageUriSelected(imageUri)
     }
 
     Column(
-        modifier = modifier
-            .padding(16.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -88,8 +109,10 @@ fun DescribeImageScreenRoot(
 @Composable
 private fun PreviewDescribeImageScreen() {
     AndroidEdgeAITheme {
-        DescribeImageScreenRoot(
+        DescribeImageScreen(
             modifier = Modifier.fillMaxSize(),
+            selectedImageUri = null,
+            onImageUriSelected = {},
         )
     }
 }
