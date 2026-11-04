@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Android Edge AI</string>
+    <string name="describe_image_browse_images">Browse Images</string>
+    <string name="describe_image_select_image_label">Select an image to display</string>
 </resources>
