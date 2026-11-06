@@ -1,59 +1,50 @@
 package com.zackjp.android.edgeai.chat
 
+import android.app.Application
+import androidx.a2ui.compose.runtime.A2uiMessageParser
+import androidx.a2ui.compose.ui.A2uiMessageProcessor
+import androidx.a2ui.model.processor.processInput
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import com.zackjp.android.edgeai.chat.a2ui.createCatalog
+import com.zackjp.android.edgeai.chat.data.ChatSession
+import com.zackjp.android.edgeai.chat.data.FakeAgent
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-class ChatScreenViewModel : ViewModel() {
+class ChatScreenViewModel(
+    application: Application,
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        ChatScreenUiState(
-            messages = emptyList(),
+    private val catalog = createCatalog(application)
+    private val processor = A2uiMessageProcessor(catalogs = listOf(catalog))
+    private val parser = A2uiMessageParser()
+
+    private val chat =
+        ChatSession(
+            agent = FakeAgent(),
+            scope = viewModelScope,
+            onA2uiMessage = { processor.processInput(parser, it) },
+            surfaces = processor.activeSurfaces,
         )
-    )
 
-    val state = _state.asStateFlow()
+    val state = chat.uiState
 
-    @OptIn(ExperimentalUuidApi::class)
-    fun onUserMessage(text: String) {
-        val echoText = getAgentEchoText(text)
+    init {
+        viewModelScope.launch(Dispatchers.Default) {
+            processor.collectMessages()
+        }
 
-        _state.update {
-            val newMessages = listOfNotNull(
-                ChatMessage(
-                    chatId = generateChatId(),
-                    author = ChatAuthor.User,
-                    text = text,
-                ),
-                echoText?.let { echo ->
-                    ChatMessage(
-                        chatId = generateChatId(),
-                        author = ChatAuthor.Agent,
-                        text = echo,
-                    )
-                }
-            )
-
-            with(it) {
-                copy(
-                    messages = messages + newMessages,
-                )
-            }
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            processor.outboundEvents.collect(chat::handleOutboundA2uiEvent)
         }
     }
 
-}
-
-@OptIn(ExperimentalUuidApi::class)
-private fun generateChatId() = Uuid.generateV7().toString()
-
-private fun getAgentEchoText(text: String): String? =
-    if (text.startsWith(prefix = "say ", ignoreCase = true)) {
-        val echo = text.substring(4)
-        echo.ifBlank { null }
-    } else {
-        null
+    @OptIn(ExperimentalUuidApi::class)
+    fun onUserMessage(text: String) {
+        chat.sendPrompt(text)
     }
+
+}
