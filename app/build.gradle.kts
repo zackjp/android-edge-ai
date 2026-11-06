@@ -6,7 +6,9 @@ plugins {
 android {
     namespace = "com.zackjp.android.edgeai"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
@@ -45,6 +47,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation("androidx.a2ui.compose:compose-runtime:1.0.0-alpha02")
+    implementation("androidx.a2ui.compose:compose-ui:1.0.0-alpha02")
+    implementation("androidx.compose.material3:material3-a2ui:1.0.0-alpha02")
     implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

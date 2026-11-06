@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +20,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.a2ui.A2uiSurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +48,7 @@ private object ChatTokens {
 @Composable
 fun ChatScreenRoot(
     modifier: Modifier = Modifier,
-    viewModel: ChatScreenViewModel = viewModel()
+    viewModel: ChatScreenViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -106,14 +109,14 @@ fun ChatMessageList(
             items = messages,
             key = { it.chatId },
         ) { message ->
-            when (message.author) {
-                ChatAuthor.Agent -> AgentMessage(
+            when (message) {
+                is AgentMessage -> AgentMessage(
                     modifier = Modifier.fillMaxWidth(),
-                    text = message.text,
+                    agentMessage = message,
                 )
-                ChatAuthor.User -> UserMessage(
+                is UserMessage -> UserMessage(
                     modifier = Modifier.fillMaxWidth(),
-                    text = message.text,
+                    userMessage = message,
                 )
             }
         }
@@ -123,20 +126,28 @@ fun ChatMessageList(
 @Composable
 fun AgentMessage(
     modifier: Modifier = Modifier,
-    text: String,
+    agentMessage: AgentMessage,
 ) {
     Row(
         modifier = modifier,
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .padding(end = ChatTokens.SidePadding)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
                 style = MaterialTheme.typography.bodyLarge,
-                text = text,
+                text = agentMessage.text,
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            if (agentMessage.surface != null) {
+                A2uiSurface(
+                    surfaceModel = agentMessage.surface,
+                )
+            }
         }
     }
 }
@@ -144,7 +155,7 @@ fun AgentMessage(
 @Composable
 fun UserMessage(
     modifier: Modifier = Modifier,
-    text: String,
+    userMessage: UserMessage,
 ) {
     Row(
         modifier = modifier,
@@ -160,7 +171,7 @@ fun UserMessage(
             Text(
                 color = ChatTokens.UserTextColor,
                 style = MaterialTheme.typography.bodyLarge,
-                text = text,
+                text = userMessage.text,
             )
         }
     }
@@ -198,24 +209,20 @@ private fun ChatScreenPreview() {
             .fillMaxSize(),
         state = ChatScreenUiState(
             messages = listOf(
-                ChatMessage(
+                UserMessage(
                     chatId = "user-111",
-                    author = ChatAuthor.User,
                     text = "Short user text",
                 ),
-                ChatMessage(
+                AgentMessage(
                     chatId = "agent-111",
-                    author = ChatAuthor.Agent,
                     text = "Short agent text",
                 ),
-                ChatMessage(
+                UserMessage(
                     chatId = "user-222",
-                    author = ChatAuthor.User,
                     text = "Long user text should be placed here so that the boundaries can be fully tested",
                 ),
-                ChatMessage(
+                AgentMessage(
                     chatId = "agent-222",
-                    author = ChatAuthor.Agent,
                     text = "Long agent text should be placed here so that the boundaries can be fully tested",
                 ),
             ),
