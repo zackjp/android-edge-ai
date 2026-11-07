@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.time.LocalTime
 import kotlin.time.Duration.Companion.milliseconds
 
 class FakeAgent : ChatAgent {
@@ -17,31 +18,84 @@ class FakeAgent : ChatAgent {
      * Simulates a real-time stream of A2UI JSON operations.
      */
     override suspend fun sendMessage(userPrompt: String) {
-        if ("test" != userPrompt) return
+        if ("weather" == userPrompt) {
+            emitWeatherCardResponse()
+        }
+    }
 
+    private suspend fun emitWeatherCardResponse() {
         _agentMessages.emit("""
             {
                 "version": "v0.9.1",
                 "createSurface": {
-                    "surfaceId": "surface1",
+                    "surfaceId": "weather-surface",
                     "catalogId": "https://a2ui.org/specification/v0_9_1/catalogs/basic/catalog.json"
                 }
             }
         """.trimIndent())
 
-        delay(1000.milliseconds)
+        delay(500.milliseconds)
         _agentMessages.emit("""
             {
                 "version": "v0.9.1",
                 "updateComponents": {
-                    "surfaceId": "surface1",
+                    "surfaceId": "weather-surface",
                     "components": [
                         {
-                            "id": "root",
+                          "id": "root",
+                          "component": "Card",
+                          "child": "weather-content"
+                        },
+                        {
+                            "id": "weather-content",
+                            "component": "Column",
+                            "children": [
+                                "hero-section"
+                            ]
+                        },
+                        {
+                            "id": "hero-section",
+                            "component": "Column",
+                            "children": [
+                                "hero-city",
+                                "updated-time",
+                                "temperature",
+                                "sky-condition",
+                                "feels-like"
+                            ]
+                        },
+                        {
+                            "id": "hero-city",
                             "component": "Text",
                             "text": {
-                                "path": "/status/message"
-                            }
+                                "path": "/city"
+                            },
+                            "variant": "h4"
+                        },
+                        {
+                            "id": "updated-time",
+                            "component": "Text",
+                            "text": {
+                                "path": "/updated"
+                            },
+                            "variant": "h5"
+                        },
+                        {
+                            "id": "temperature",
+                            "component": "Text",
+                            "text": "62°",
+                            "variant": "h1"
+                        },
+                        {
+                            "id": "sky-condition",
+                            "component": "Text",
+                            "text": "Partly cloudy",
+                            "variant": "h5"
+                        },
+                        {
+                            "id": "feels-like",
+                            "component": "Text",
+                            "text": "Feels like 59° · H 66° · L 51°"
                         }
                     ]
                 }
@@ -49,75 +103,32 @@ class FakeAgent : ChatAgent {
         """.trimIndent())
 
         delay(1500.milliseconds)
-        _agentMessages.emit(
-            """
-            {
-                "version": "v0.9.1",
-                "updateDataModel": {
-                    "surfaceId": "surface1",
-                    "path": "/status/message",
-                    "value": "Doing some fake background work..."
-                }
-            }
-            """.trimIndent()
-        )
-
         _agentMessages.emit("""
             {
                 "version": "v0.9.1",
-                "createSurface": {
-                    "surfaceId": "surface2",
-                    "catalogId": "https://a2ui.org/specification/v0_9_1/catalogs/basic/catalog.json"
+                "updateDataModel": {
+                    "surfaceId": "weather-surface",
+                    "path": "/city",
+                    "value": "New York, NY"
                 }
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
 
-        delay(1000.milliseconds)
+        delay(250.milliseconds)
+        val currentTime = LocalTime.now()
         _agentMessages.emit("""
             {
                 "version": "v0.9.1",
-                "updateComponents": {
-                    "surfaceId": "surface2",
-                    "components": [
-                        {
-                            "id": "root",
-                            "component": "Text",
-                            "text": {
-                                "path": "/status/message"
-                            }
-                        }
-                    ]
-                }
-            }
-        """.trimIndent())
-
-        delay(1500.milliseconds)
-        _agentMessages.emit(
-            """
-            {
-                "version": "v0.9.1",
                 "updateDataModel": {
-                    "surfaceId": "surface2",
-                    "path": "/status/message",
-                    "value": "Surface2 Message Complete."
+                    "surfaceId": "weather-surface",
+                    "path": "/updated",
+                    "value": "Updated ${currentTime.hour % 12}:${currentTime.minute}"
                 }
             }
             """.trimIndent()
         )
 
-        delay(1500.milliseconds)
-        _agentMessages.emit(
-            """
-            {
-                "version": "v0.9.1",
-                "updateDataModel": {
-                    "surfaceId": "surface1",
-                    "path": "/status/message",
-                    "value": "Job's done."
-                }
-            }
-            """.trimIndent()
-        )
     }
 
 }
