@@ -14,14 +14,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import com.zackjp.android.edgeai.chat.a2ui.components.WeatherComponent
 
 
-fun createCatalog(context: Context): A2uiCatalog {
+fun createBasicCatalog(context: Context): A2uiCatalog {
     return materialA2uiBasicCatalogV1(
         image = MaterialA2uiBasicCatalogV1Defaults.image(CoilA2uiImageRenderer),
         video = MaterialA2uiBasicCatalogV1Defaults.video(EmptyA2uiVideoRenderer),
         audioPlayer = MaterialA2uiBasicCatalogV1Defaults.audioPlayer(EmptyA2uiAudioPlayer),
         functions = A2uiBasicCatalogV1.Functions(context),
+    )
+}
+
+fun createCustomAppCatalog(): A2uiCatalog {
+    return A2uiCatalog(
+        catalogId = "https://com.zackjp.android/catalogs/edgeai/v1/catalog.json",
+        components = listOf(
+            WeatherComponent(),
+        ),
     )
 }
 
@@ -53,7 +63,7 @@ private object EmptyA2uiVideoRenderer : A2uiVideoRenderer {
         onError: (throwable: Throwable?) -> Unit,
     ) {
         Box(
-           modifier = modifier,
+            modifier = modifier,
         ) {
             Text(
                 text = "Video renderer: $url",

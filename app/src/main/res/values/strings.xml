@@ -3,4 +3,7 @@
     <string name="chat_screen_chat_placeholder">Ask agent here</string>
     <string name="describe_image_browse_images">Browse Images</string>
     <string name="describe_image_select_image_label">Select an image to display</string>
+    <string name="weather_condition_partly_cloudy">Partly cloudy</string>
+    <string name="weather_condition_sunny">Sunny</string>
+    <string name="weather_condition_rainy">Rainy</string>
 </resources>

@@ -6,9 +6,10 @@ import androidx.a2ui.compose.ui.A2uiMessageProcessor
 import androidx.a2ui.model.processor.processInput
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zackjp.android.edgeai.chat.a2ui.createCatalog
+import com.zackjp.android.edgeai.chat.a2ui.createBasicCatalog
+import com.zackjp.android.edgeai.chat.a2ui.createCustomAppCatalog
 import com.zackjp.android.edgeai.chat.data.ChatSession
-import com.zackjp.android.edgeai.chat.data.FakeAgent
+import com.zackjp.android.edgeai.chat.data.StreamingFakeAgent
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,13 +19,19 @@ class ChatScreenViewModel(
     application: Application,
 ) : ViewModel() {
 
-    private val catalog = createCatalog(application)
-    private val processor = A2uiMessageProcessor(catalogs = listOf(catalog))
+    private val basicCatalog = createBasicCatalog(application)
+    private val customAppCatalog = createCustomAppCatalog()
+    private val processor = A2uiMessageProcessor(
+        catalogs = listOf(
+            basicCatalog,
+            customAppCatalog,
+        )
+    )
     private val parser = A2uiMessageParser()
 
     private val chat =
         ChatSession(
-            agent = FakeAgent(),
+            agent = StreamingFakeAgent(),
             scope = viewModelScope,
             onA2uiMessage = { processor.processInput(parser, it) },
             surfaces = processor.activeSurfaces,
