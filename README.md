@@ -22,7 +22,7 @@ Real agents are slower, which is where progressive rendering comes into play.
 Here's A2UI in action in this project – a native Weather Card rendered progressively from a
 mocked agent response.
 
-<img height="450" src="https://github.com/zackjp/android-edge-ai/blob/main/screenshots/2026-11-07-1330%20-%20Custom%20Weather%20Card.png?raw=true" /><video height="450" src="https://github.com/zackjp/android-edge-ai/raw/refs/heads/main/screenshots/2026-11-07-1330%20-%20Custom%20Weather%20Card%20-%20Progressive%20Load.mp4?raw=true" controls></video>
+<img height="450" alt="Image of a rendered custom agent UI component" src="https://github.com/zackjp/android-edge-ai/blob/main/screenshots/2026-11-07-1330%20-%20Custom%20Weather%20Card.png?raw=true" /> <img height="450" alt="Video of progressive loading a custom agent UI component" src="https://github.com/zackjp/android-edge-ai/blob/main/screenshots/2026-11-07-1330%20-%20custom%20weather%20card%20-%20progressive%20load.gif?raw=true" />
 
 ### Approach
 
@@ -42,7 +42,7 @@ Testing how well an agent performs in real world conditions will be the next ste
 
 ### Learnings
 
-#### Default components
+#### Basic/Default A2UI components
 
 These are standard, out-of-the-box UI components – things like Text, Image, Icon, and Column/Row for
 layouts. The upside is they provide flexibility over what information to show and how to arrange it.
@@ -54,12 +54,17 @@ The second is it can lead to an inconsistent experience. Building block componen
 too much arrangement flexibility. An agent could lay out the weather card differently each time.
 
 Here's the Weather Card rendered dynamically with default components. It gets the job done,
-but lacks visual identity.
+but you'll see it lacks visual identity and padding can't be controlled.
 
-<video height="450" src="https://github.com/zackjp/android-edge-ai/raw/refs/heads/main/screenshots/2026-11-06-2036%20-%20dynamic%20weather%20card.mp4" controls></video>
+<img height="450" alt="Image of a rendered agent UI with basic components" src="https://github.com/zackjp/android-edge-ai/blob/main/screenshots/2026-11-06-2036%20-%20default%20components%20weather%20card.gif?raw=true" />
 
-#### Custom components
+#### Custom A2UI components
 
-My opinion is that custom components are the better option. You get full control over spacing
-and typography, as well as consistent visual design. The tradeoff is that new components
-require a mobile app release. However, the higher, more consistent quality seems worth it.
+You get full control over spacing and typography, as well as consistent visual design. The tradeoff
+is that new components require a mobile app release. That said, the higher, more consistent quality
+seems worth it.
+
+#### Conclusion
+
+Custom components are the better option for production apps. The basic components are great
+for rapid prototyping.
